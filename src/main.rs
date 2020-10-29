@@ -15,15 +15,13 @@ use std::thread;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::collections::VecDeque;
-use std::str;
 
 #[derive(Clone)]
 struct WorkQueue<T: Send> {
     inner: Arc<Mutex<VecDeque<T>>>,
 }
 
-impl<T: Send + Copy> WorkQueue<T> {
-
+impl<T: Send> WorkQueue<T> {
     fn new() -> Self { 
         Self { inner: Arc::new(Mutex::new(VecDeque::new())) } 
     }
@@ -44,7 +42,6 @@ impl<T: Send + Copy> WorkQueue<T> {
             panic!("WorkQueue::get_work() tried to lock a poisoned mutex")
         }
     }
-
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
@@ -53,20 +50,18 @@ struct Video {
 }
 
 impl Video {
-
     pub fn download(self) -> bool {
         let output = Command::new("youtube-dl")
                 .args(&["-f", "best", "--extract-audio", "--audio-format", "mp3", &self.link])
                 .output()
                 .expect("failed to execute process");
-        let output = match str::from_utf8(&output.stdout) {
+        let output = match std::str::from_utf8(&output.stdout) {
             Ok(res) => res.into(),
             Err(e) => format!("Youtube-dl Error: {:?}", e)
         };
         println!("Youtube-dl: {}", output);
         false
     }
-
 }
 
 /*const NAME_LIMIT: u64 = 256;
